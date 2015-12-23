@@ -8,6 +8,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
     private GoogleApiClient client;
     FileOutputStream fos;
     ObjectOutputStream oos;
+    File f;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,23 +60,29 @@ public class MainActivity extends Activity {
         nextDateBox.setText("Hello");
         updateNextTime();
 
-        try {
-            fos  = new FileOutputStream(getFilesDir() + "test.txt", true);
-            oos = new ObjectOutputStream(fos);
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-        }
-
-
-
         myButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 try {
+                    f = new File(getFilesDir() + "test.txt");
+
+
+
+                    if(f.exists() && !f.isDirectory()) {
+                        Log.i("AddictionGuide", "Appending");
+                        fos  = new FileOutputStream(getFilesDir() + "test.txt", true);
+                        oos = new AppendingObjectOutputStream(fos);
+                    }
+                    else
+                    {
+                        fos  = new FileOutputStream(getFilesDir() + "test.txt", true);
+                        Log.i("AddictionGuide", "New File");
+                        oos = new ObjectOutputStream(fos);
+                    }
 
                     oos.writeObject(Calendar.getInstance());
+                    oos.close();
                     updateNextTime();
+
 
                 }
                 catch (Exception e)
@@ -94,8 +102,8 @@ public class MainActivity extends Activity {
 
     protected void updateNextTime()
     {
-        List<Calendar> dateList = new ArrayList<Calendar>();
-        Calendar nextDate = Calendar.getInstance();
+        List<Calendar> dateList = new ArrayList<>();
+        Calendar nextDate;
         try{
             FileInputStream fis = new FileInputStream(getFilesDir() + "test.txt");
             ObjectInputStream ois = new ObjectInputStream(fis);
@@ -103,7 +111,7 @@ public class MainActivity extends Activity {
             Calendar temp;
             int count = 0;
 
-            while(flag == true)
+            while(flag)
             {
                 temp = (Calendar)ois.readObject();
                 if(temp == null)
@@ -116,6 +124,7 @@ public class MainActivity extends Activity {
                 }
                 System.out.println("Count is : " + count++);
             }
+            ois.close();
         }
         catch (Exception e)
         {
