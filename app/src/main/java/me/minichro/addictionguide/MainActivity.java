@@ -1,6 +1,8 @@
 package me.minichro.addictionguide;
 
 import android.app.Activity;
+import android.app.DatePickerDialog;
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
@@ -8,10 +10,15 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
@@ -29,17 +36,36 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends Activity {
 
     private Button myButton;
+    private Button addButton;
+
+    private DatePickerDialog datePicker;
+    private TimePickerDialog timePicker;
+
+    private TextView dateText;
+    private TextView timeText;
+    private TextView recentDates;
+
+    private SimpleDateFormat dateFormat;
+    private SimpleDateFormat timeFormat;
+    private SimpleDateFormat dateTimeFormat;
+
+    private Calendar custDate;
+
     private TextView nextDateBox;
     private File myFile;
     private Time myTime;
+    private int numLevels;
+    private int[] levelSpaces;
     Context context;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -49,16 +75,80 @@ public class MainActivity extends Activity {
     FileOutputStream fos;
     ObjectOutputStream oos;
     File f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        
         context = this;
         nextDateBox = (TextView) findViewById(R.id.textView);
         myButton = (Button) findViewById(R.id.button);
+        addButton = (Button) findViewById(R.id.button2);
+        dateText = (TextView) findViewById(R.id.editText);
+        timeText = (TextView) findViewById(R.id.editText2);
+        recentDates = (TextView) findViewById(R.id.textView3);
+        custDate = Calendar.getInstance();
+        dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        timeFormat = new SimpleDateFormat("HH:mm");
+        dateTimeFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+        updateCustDateBox();
+        updateCustTimeBox();
+
+        dateText.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new DatePickerDialog(MainActivity.this, datePickerListener, custDate.get(Calendar.YEAR), custDate.get(Calendar.MONTH), custDate.get(Calendar.DAY_OF_MONTH)).show();
+            }
+        });
+
+        timeText.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                new TimePickerDialog(MainActivity.this, timePickerListener, custDate.get(Calendar.HOUR_OF_DAY), custDate.get(Calendar.MINUTE), true).show();
+            }
+        });
+
         nextDateBox.setText("Hello");
+
+        numLevels = 6;
+        levelSpaces = new int[numLevels];
+
+        levelSpaces[0] = 6 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+        levelSpaces[1] = 24 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+        levelSpaces[2] = 48 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+        levelSpaces[3] = 96 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+        levelSpaces[4] = 192 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+        levelSpaces[5] = 384 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+
         updateNextTime();
+
+        addButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    f = new File(getFilesDir() + "test.txt");
+
+
+                    if (f.exists() && !f.isDirectory()) {
+                        Log.i("AddictionGuide", "Appending");
+                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                        oos = new AppendingObjectOutputStream(fos);
+                    } else {
+                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                        Log.i("AddictionGuide", "New File");
+                        oos = new ObjectOutputStream(fos);
+                    }
+
+                    oos.writeObject(custDate);
+                    oos.close();
+                    updateNextTime();
+                    Toast.makeText(MainActivity.this, "Added " + dateTimeFormat.format(custDate.getTime()) + " to Database", Toast.LENGTH_SHORT).show();
+
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
+            }
+        });
 
         myButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -66,15 +156,12 @@ public class MainActivity extends Activity {
                     f = new File(getFilesDir() + "test.txt");
 
 
-
-                    if(f.exists() && !f.isDirectory()) {
+                    if (f.exists() && !f.isDirectory()) {
                         Log.i("AddictionGuide", "Appending");
-                        fos  = new FileOutputStream(getFilesDir() + "test.txt", true);
+                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
                         oos = new AppendingObjectOutputStream(fos);
-                    }
-                    else
-                    {
-                        fos  = new FileOutputStream(getFilesDir() + "test.txt", true);
+                    } else {
+                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
                         Log.i("AddictionGuide", "New File");
                         oos = new ObjectOutputStream(fos);
                     }
@@ -82,11 +169,10 @@ public class MainActivity extends Activity {
                     oos.writeObject(Calendar.getInstance());
                     oos.close();
                     updateNextTime();
+                    Toast.makeText(MainActivity.this, "Added Current Time to Database", Toast.LENGTH_SHORT).show();
 
 
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     e.printStackTrace();
 
                 }
@@ -99,68 +185,95 @@ public class MainActivity extends Activity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
+        @Override
+        public void onDateSet(DatePicker view, int year, int month, int day) {
+            if (view.isShown()) {
+                custDate.set(Calendar.YEAR, year);
+                custDate.set(Calendar.MONTH, month);
+                custDate.set(Calendar.DAY_OF_MONTH, day);
+                updateCustDateBox();
+            }
+        }
+    };
 
-    protected void updateNextTime()
-    {
+    TimePickerDialog.OnTimeSetListener timePickerListener = new TimePickerDialog.OnTimeSetListener() {
+        @Override
+        public void onTimeSet(TimePicker view, int hour, int minute) {
+            if (view.isShown()) {
+                custDate.set(Calendar.HOUR_OF_DAY, hour);
+                custDate.set(Calendar.MINUTE, minute);
+                updateCustTimeBox();
+            }
+        }
+
+    };
+
+    public void updateCustDateBox() {
+        dateText.setText(dateFormat.format(custDate.getTime()));
+    }
+
+    public void updateCustTimeBox() {
+        timeText.setText(timeFormat.format(custDate.getTime()));
+    }
+
+    protected void updateNextTime() {
         List<Calendar> dateList = new ArrayList<>();
         Calendar nextDate;
-        try{
+        try {
             FileInputStream fis = new FileInputStream(getFilesDir() + "test.txt");
             ObjectInputStream ois = new ObjectInputStream(fis);
             boolean flag = true;
             Calendar temp;
             int count = 0;
 
-            while(flag)
-            {
-                temp = (Calendar)ois.readObject();
-                if(temp == null)
-                {
+            while (flag) {
+                temp = (Calendar) ois.readObject();
+                if (temp == null) {
                     flag = false;
-                }
-                else
-                {
+                } else {
                     dateList.add(temp);
                 }
                 System.out.println("Count is : " + count++);
             }
             ois.close();
-        }
-        catch (Exception e)
-        {
-            if(!(e instanceof EOFException))
-            {
+        } catch (Exception e) {
+            if (!(e instanceof EOFException)) {
                 e.printStackTrace();
             }
         }
 
-        if(dateList.size() == 0)
-        {
+        if (dateList.size() > 0) {
+            Collections.sort(dateList);
+            /* Recent dates must be update before calling processDateList, since processDateList will modify the list of dates */
+            recentDates.setText("");
+
+            for (int i = dateList.size()-1; i >= 0; i--) {
+                recentDates.setText(recentDates.getText().toString() + dateTimeFormat.format(dateList.get(i).getTime())+"\n");
+            }
+
+
+            Calendar dateToSet = processDateList(dateList);
+            nextDateBox.setText(dateTimeFormat.format(dateToSet.getTime()));
+
+        } else {
             nextDateBox.setText("No Data yet");
         }
-        else if(dateList.size() == 1)
-        {
-            nextDate = dateList.get(0);
-            nextDate.add(Calendar.HOUR,6);
-            nextDateBox.setText("" + nextDate.get(Calendar.DAY_OF_MONTH) + "/" + (1+nextDate.get(Calendar.MONTH)) + "/" + nextDate.get(Calendar.YEAR) + "  " + nextDate.get(Calendar.HOUR) + ":" + nextDate.get(Calendar.MINUTE));
-        }
-        else if(dateList.size() >= 2)
-        {
-            Calendar start = dateList.get(0);
-            Calendar end = dateList.get(1);
-            long diff = Math.abs(start.getTimeInMillis() - end.getTimeInMillis());
-            if(diff > 18 * 60 * 60 * 1000)
-            {
-                nextDate = end;
-                nextDate.add(Calendar.HOUR,6);
+    }
+
+    private Calendar processDateList(List<Calendar> dateList) {
+        Calendar maxDate = Calendar.getInstance();
+        Calendar nextDate;
+
+        for (int i = dateList.size() - 1; (i > dateList.size() - 1 - numLevels) && (i >= 0); i--) {
+            nextDate = dateList.get(i);
+            nextDate.add(Calendar.MILLISECOND, levelSpaces[dateList.size() - i - 1]);
+
+            if (maxDate.before(nextDate)) {
+                maxDate = nextDate;
             }
-            else
-            {
-                nextDate = start;
-                nextDate.add(Calendar.HOUR,24);
-            }
-            nextDateBox.setText("" + nextDate.get(Calendar.DAY_OF_MONTH) + "/" + (1 + nextDate.get(Calendar.MONTH)) + "/" + nextDate.get(Calendar.YEAR) + "  " + nextDate.get(Calendar.HOUR) + ":" + nextDate.get(Calendar.MINUTE));
         }
+        return maxDate;
     }
 
     @Override
