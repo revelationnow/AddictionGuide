@@ -4,15 +4,23 @@ import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -43,7 +51,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     private Button myButton;
     private Button addButton;
@@ -66,6 +74,8 @@ public class MainActivity extends Activity {
     private Time myTime;
     private int numLevels;
     private int[] levelSpaces;
+
+    private SharedPreferences sharedPref;
     Context context;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
@@ -79,8 +89,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
-        
+
         context = this;
         nextDateBox = (TextView) findViewById(R.id.textView);
         myButton = (Button) findViewById(R.id.button);
@@ -94,6 +105,16 @@ public class MainActivity extends Activity {
         dateTimeFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm");
         updateCustDateBox();
         updateCustTimeBox();
+
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
+
+
+        getSupportActionBar().setHomeButtonEnabled(true);
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPref.registerOnSharedPreferenceChangeListener(listener);
+
+        //getSupportActionBar().setCustomView(R.menu.menu);
 
         dateText.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -109,16 +130,7 @@ public class MainActivity extends Activity {
 
         nextDateBox.setText("Hello");
 
-        numLevels = 6;
-        levelSpaces = new int[numLevels];
-
-        levelSpaces[0] = 6 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-        levelSpaces[1] = 24 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-        levelSpaces[2] = 48 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-        levelSpaces[3] = 96 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-        levelSpaces[4] = 192 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-        levelSpaces[5] = 384 * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-
+        updateNumLevels();
         updateNextTime();
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -185,6 +197,42 @@ public class MainActivity extends Activity {
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
     }
 
+    private void updateNumLevels() {
+        sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+
+        numLevels = Integer.parseInt(sharedPref.getString("numLevels", ""));
+        System.out.println("Number of levels is " + numLevels);
+        levelSpaces = new int[numLevels];
+
+
+        levelSpaces[0] = Integer.parseInt(sharedPref.getString("level_1_hours", "6")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+
+        if (numLevels > 1) {
+            levelSpaces[1] = Integer.parseInt(sharedPref.getString("level_2_hours", "24")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+            if (numLevels > 2) {
+                levelSpaces[2] = Integer.parseInt(sharedPref.getString("level_3_hours", "48")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+                if (numLevels > 3) {
+                    levelSpaces[3] = Integer.parseInt(sharedPref.getString("level_4_hours", "96")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+                    if (numLevels > 4) {
+                        levelSpaces[4] = Integer.parseInt(sharedPref.getString("level_5_hours", "192")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+                        if (numLevels > 5) {
+                            levelSpaces[5] = Integer.parseInt(sharedPref.getString("level_6_hours", "384")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        //getMenuInflater().inflate(R.menu.main, menu);
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu, menu);
+        return true;
+    }
+
     DatePickerDialog.OnDateSetListener datePickerListener = new DatePickerDialog.OnDateSetListener() {
         @Override
         public void onDateSet(DatePicker view, int year, int month, int day) {
@@ -208,6 +256,14 @@ public class MainActivity extends Activity {
         }
 
     };
+
+    SharedPreferences.OnSharedPreferenceChangeListener listener =
+            new SharedPreferences.OnSharedPreferenceChangeListener() {
+                public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+                    updateNumLevels();
+                    updateNextTime();
+                }
+            };
 
     public void updateCustDateBox() {
         dateText.setText(dateFormat.format(custDate.getTime()));
@@ -248,8 +304,8 @@ public class MainActivity extends Activity {
             /* Recent dates must be update before calling processDateList, since processDateList will modify the list of dates */
             recentDates.setText("");
 
-            for (int i = dateList.size()-1; i >= 0; i--) {
-                recentDates.setText(recentDates.getText().toString() + dateTimeFormat.format(dateList.get(i).getTime())+"\n");
+            for (int i = dateList.size() - 1; i >= 0; i--) {
+                recentDates.setText(recentDates.getText().toString() + dateTimeFormat.format(dateList.get(i).getTime()) + "\n");
             }
 
 
@@ -279,18 +335,21 @@ public class MainActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        sharedPref.registerOnSharedPreferenceChangeListener(listener);
+        updateNumLevels();
         updateNextTime();
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        sharedPref.unregisterOnSharedPreferenceChangeListener(listener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        sharedPref.unregisterOnSharedPreferenceChangeListener(listener);
         // ATTENTION: This was auto-generated to implement the App Indexing API.
         // See https://g.co/AppIndexing/AndroidStudio for more information.
         Action viewAction = Action.newAction(
@@ -327,5 +386,15 @@ public class MainActivity extends Activity {
                 Uri.parse("android-app://me.minichro.addictionguide/http/host/path")
         );
         AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(this, SettingsActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
