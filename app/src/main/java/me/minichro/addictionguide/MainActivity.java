@@ -200,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
     private void updateNumLevels() {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
 
-        numLevels = Integer.parseInt(sharedPref.getString("numLevels", ""));
+        numLevels = Integer.parseInt(sharedPref.getString("numLevels", "3"));
         System.out.println("Number of levels is " + numLevels);
         levelSpaces = new int[numLevels];
 
