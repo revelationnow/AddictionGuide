@@ -15,10 +15,7 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
+
         android:background="#00000000"
         >
     <RelativeLayout
@@ -27,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:background="#00000000"
-        android:padding="2dp">
+        android:padding="0dp">
         <TextView
             android:id="@+id/textView4"
             android:layout_width="fill_parent"
@@ -50,16 +47,15 @@
             android:id="@+id/textView"
             android:layout_width="fill_parent"
             android:layout_height="20pt"
+            android:layout_alignParentStart="true"
             android:layout_alignParentLeft="true"
             android:layout_below="@+id/textView4"
-
-            android:background="#ccc0ebf2"
+            android:background="#ddffffff"
             android:gravity="center"
             android:text="Medium Text"
-            android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="#000000"
-            android:textSize="28dp"
+            android:textSize="28sp"
             android:typeface="normal" />
 
 
@@ -68,7 +64,7 @@
     <Space
         android:id="@+id/space2"
         android:layout_width="fill_parent"
-        android:layout_height="5pt"
+        android:layout_height="0pt"
         android:layout_below="@+id/rellayout1" />
 
     <RelativeLayout
@@ -77,7 +73,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/space2"
         android:background="#00000000"
-        android:padding="2dp">
+        android:padding="0dp">
 
         <TextView
             android:id="@+id/editText4"
@@ -85,61 +81,65 @@
             android:layout_height="20pt"
             android:layout_alignParentTop="true"
 
-            android:background="#ccff9999"
+            android:background="#bbff0000"
             android:ems="10"
             android:gravity="center"
 
             android:text="Select Date and Time"
             android:textAlignment="center"
-            android:textColor="#cc0000"
-            android:textIsSelectable="false"
-            android:textSize="22dp"
-            android:textStyle="bold" />
-
-
-
-
-
-        <TextView
-            android:id="@+id/editText"
-            android:layout_width="80pt"
-            android:layout_height="20pt"
-            android:layout_below="@+id/editText4"
-
-            android:background="#ccff9999"
-            android:ems="10"
-            android:gravity="center"
-            android:inputType="date"
-            android:text="Medium Text"
-            android:textAlignment="center"
             android:textColor="#ffffff"
             android:textIsSelectable="false"
             android:textSize="22dp"
             android:textStyle="bold" />
 
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editText4"
+            android:id="@+id/linear_layout_1">
+
+        <TextView
+            android:id="@+id/editText"
+            android:layout_weight=".50"
+            android:layout_width="0dp"
+            android:layout_height="20pt"
+            android:layout_below="@+id/editText4"
+
+            android:background="#ccff0000"
+            android:ems="10"
+            android:gravity="center"
+            android:inputType="date"
+            android:text="Medium Text"
+            android:textColor="#ffffff"
+            android:textIsSelectable="false"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
         <TextView
             android:id="@+id/editText2"
-            android:layout_width="80pt"
+            android:layout_weight=".50"
+            android:layout_width="0dp"
             android:layout_height="20pt"
             android:layout_alignParentEnd="true"
             android:layout_alignParentRight="true"
             android:layout_below="@+id/editText4"
             android:layout_centerVertical="true"
-            android:background="#ccff9999"
+            android:background="#ccff0000"
             android:ems="10"
             android:gravity="center"
             android:inputType="time"
             android:text="Medium Text"
-            android:textAlignment="center"
             android:textColor="#ffffff"
-            android:textSize="22dp"
+            android:textSize="22sp"
             android:textStyle="bold" />
-
+</LinearLayout>
         <Space
             android:id="@+id/space4"
             android:layout_width="fill_parent"
-            android:layout_height="5pt"
-            android:layout_below="@+id/editText2"
+            android:layout_height="0pt"
+            android:layout_below="@+id/linear_layout_1"
             android:background="#ccff9999"/>
 
         <Button
@@ -149,14 +149,14 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/space4"
-            android:background="#ccff3333"
+            android:background="#dd880000"
             android:text="ADD SELECTED TIME"
-            android:textSize="20dp" />
+            android:textSize="20sp" />
 
         <Space
             android:id="@+id/space3"
             android:layout_width="fill_parent"
-            android:layout_height="5pt"
+            android:layout_height="0pt"
             android:layout_below="@+id/button2"
             android:background="#ccff9999"/>
 
@@ -167,7 +167,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_below="@+id/space3"
-            android:background="#ccff3333"
+            android:background="#ccaa0000"
             android:text="Add current Time"
             android:textSize="20dp" />
     </RelativeLayout>
@@ -175,7 +175,7 @@
     <Space
         android:id="@+id/space1"
         android:layout_width="fill_parent"
-        android:layout_height="5pt"
+        android:layout_height="0pt"
         android:layout_below="@+id/rellayout2" />
 
     <RelativeLayout
@@ -184,30 +184,30 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/space1"
         android:background="#00000000"
-        android:padding="2dp">
+        android:padding="0dp">
 
 
         <TextView
             android:id="@+id/textView2"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="50dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
             android:layout_centerVertical="true"
-            android:background="#ccaabbd7"
+            android:background="#bb0055aa"
             android:gravity="center"
             android:text="Recent Times"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
-            android:textColor="#aa22d7"
+            android:textColor="#ffffff"
             android:textSize="30dp"
             android:textStyle="bold" />
 
         <ScrollView
             android:id="@+id/scrollView"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="fill_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:background="#00000000"
@@ -216,14 +216,14 @@
             <TextView
                 android:id="@+id/textView3"
                 android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="fill_parent"
                 android:layout_below="@+id/scrollView"
                 android:layout_toEndOf="@+id/scrollView"
                 android:layout_toRightOf="@+id/scrollView"
                 android:gravity="center"
                 android:inputType="textMultiLine"
-                android:background="#ccaabbd7"
-                android:textColor="#000000"
+                android:background="#99000000"
+                android:textColor="#ffffff"
                 android:text="Medium Text"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textIsSelectable="false"

@@ -59,8 +59,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity implements Sha
 
         setContentView(R.layout.activity_settings);
 
-        Toolbar actionbar = (Toolbar) findViewById(R.id.my_toolbar);
-        actionbar.setTitle("Settings");
+
         // Display the fragment as the main content.
 //        getFragmentManager().beginTransaction()
 //                .replace(android.R.id.content, new SettingsFragment())

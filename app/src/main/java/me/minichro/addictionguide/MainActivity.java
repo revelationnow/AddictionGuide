@@ -1,9 +1,11 @@
 package me.minichro.addictionguide;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -106,15 +108,11 @@ public class MainActivity extends AppCompatActivity {
         updateCustDateBox();
         updateCustTimeBox();
 
-        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
-        setSupportActionBar(myToolbar);
-
-
+        getSupportActionBar().show();
         getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayUseLogoEnabled(true);
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPref.registerOnSharedPreferenceChangeListener(listener);
-
-        //getSupportActionBar().setCustomView(R.menu.menu);
 
         dateText.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -135,59 +133,85 @@ public class MainActivity extends AppCompatActivity {
 
         addButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    f = new File(getFilesDir() + "test.txt");
+                new AlertDialog.Builder(MainActivity.this)
+                        .setView(getLayoutInflater().inflate(R.layout.content_alert,null))
+                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert,null))
+                        .setTitle("Add")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                try {
+                                    f = new File(getFilesDir() + "test.txt");
 
 
-                    if (f.exists() && !f.isDirectory()) {
-                        Log.i("AddictionGuide", "Appending");
-                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
-                        oos = new AppendingObjectOutputStream(fos);
-                    } else {
-                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
-                        Log.i("AddictionGuide", "New File");
-                        oos = new ObjectOutputStream(fos);
-                    }
+                                    if (f.exists() && !f.isDirectory()) {
+                                        Log.i("AddictionGuide", "Appending");
+                                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                                        oos = new AppendingObjectOutputStream(fos);
+                                    } else {
+                                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                                        Log.i("AddictionGuide", "New File");
+                                        oos = new ObjectOutputStream(fos);
+                                    }
 
-                    oos.writeObject(custDate);
-                    oos.close();
-                    updateNextTime();
-                    Toast.makeText(MainActivity.this, "Added " + dateTimeFormat.format(custDate.getTime()) + " to Database", Toast.LENGTH_SHORT).show();
+                                    oos.writeObject(custDate);
+                                    oos.close();
+                                    updateNextTime();
+                                    Toast.makeText(MainActivity.this, "Added " + dateTimeFormat.format(custDate.getTime()) + " to Database", Toast.LENGTH_SHORT).show();
 
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
 
-                }
+                                }
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
 
         myButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                try {
-                    f = new File(getFilesDir() + "test.txt");
+                new AlertDialog.Builder(MainActivity.this)
+                        .setView(getLayoutInflater().inflate(R.layout.content_alert,null))
+                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert,null))
+                        .setTitle("Add")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                                try {
+                                    f = new File(getFilesDir() + "test.txt");
 
 
-                    if (f.exists() && !f.isDirectory()) {
-                        Log.i("AddictionGuide", "Appending");
-                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
-                        oos = new AppendingObjectOutputStream(fos);
-                    } else {
-                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
-                        Log.i("AddictionGuide", "New File");
-                        oos = new ObjectOutputStream(fos);
-                    }
+                                    if (f.exists() && !f.isDirectory()) {
+                                        Log.i("AddictionGuide", "Appending");
+                                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                                        oos = new AppendingObjectOutputStream(fos);
+                                    } else {
+                                        fos = new FileOutputStream(getFilesDir() + "test.txt", true);
+                                        Log.i("AddictionGuide", "New File");
+                                        oos = new ObjectOutputStream(fos);
+                                    }
 
-                    oos.writeObject(Calendar.getInstance());
-                    oos.close();
-                    updateNextTime();
-                    Toast.makeText(MainActivity.this, "Added Current Time to Database", Toast.LENGTH_SHORT).show();
+                                    oos.writeObject(Calendar.getInstance());
+                                    oos.close();
+                                    updateNextTime();
+                                    Toast.makeText(MainActivity.this, "Added Current Time to Database", Toast.LENGTH_SHORT).show();
 
 
-                } catch (Exception e) {
-                    e.printStackTrace();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
 
-                }
+                                }
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
             }
         });
 
