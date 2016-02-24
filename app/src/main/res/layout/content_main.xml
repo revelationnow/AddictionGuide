@@ -177,12 +177,22 @@
         android:layout_width="fill_parent"
         android:layout_height="0pt"
         android:layout_below="@+id/rellayout2" />
+<TextView
+    android:layout_width="match_parent"
+    android:layout_height="40dp"
+    android:background="#ccffffff"
+    android:layout_below="@+id/space1"
+    android:textSize="20sp"
+    android:text="CURRENT LEVEL : "
+    android:textAlignment="center"
+    android:gravity="center"
+    android:id="@+id/textView5"/>
 
     <RelativeLayout
         android:id="@+id/rellayout3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/space1"
+        android:layout_below="@+id/textView5"
         android:background="#00000000"
         android:padding="0dp">
 

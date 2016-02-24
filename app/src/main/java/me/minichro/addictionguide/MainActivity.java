@@ -64,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView dateText;
     private TextView timeText;
     private TextView recentDates;
+    private TextView currLevel;
 
     private SimpleDateFormat dateFormat;
     private SimpleDateFormat timeFormat;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
     private Time myTime;
     private int numLevels;
     private int[] levelSpaces;
+    private int currUserLevel;
 
     private SharedPreferences sharedPref;
     Context context;
@@ -101,6 +103,7 @@ public class MainActivity extends AppCompatActivity {
         dateText = (TextView) findViewById(R.id.editText);
         timeText = (TextView) findViewById(R.id.editText2);
         recentDates = (TextView) findViewById(R.id.textView3);
+        currLevel = (TextView) findViewById(R.id.textView5);
         custDate = Calendar.getInstance();
         dateFormat = new SimpleDateFormat("MM/dd/yyyy");
         timeFormat = new SimpleDateFormat("HH:mm");
@@ -314,7 +317,7 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     dateList.add(temp);
                 }
-                System.out.println("Count is : " + count++);
+                count++;
             }
             ois.close();
         } catch (Exception e) {
@@ -334,6 +337,8 @@ public class MainActivity extends AppCompatActivity {
 
 
             Calendar dateToSet = processDateList(dateList);
+            currUserLevel = updateUserLevel(dateList);
+            currLevel.setText("CURRENT LEVEL : " + currUserLevel);
             nextDateBox.setText(dateTimeFormat.format(dateToSet.getTime()));
 
         } else {
@@ -341,6 +346,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /* Here dateList will get updated by the levelspaces, so all further use must consider that
+     *
+     */
     private Calendar processDateList(List<Calendar> dateList) {
         Calendar maxDate = Calendar.getInstance();
         Calendar nextDate;
@@ -350,11 +358,34 @@ public class MainActivity extends AppCompatActivity {
             nextDate.add(Calendar.MILLISECOND, levelSpaces[dateList.size() - i - 1]);
 
             if (maxDate.before(nextDate)) {
+
                 maxDate = nextDate;
+
             }
         }
         return maxDate;
     }
+
+    /* dateList already has levelSpaces added to it, so no need to add levelSpaces to get the cutoff date for each level
+     *
+     */
+    private int updateUserLevel(List<Calendar> dateList)
+    {
+        Calendar maxDate = Calendar.getInstance();
+        Calendar nextDate;
+        int retLevel = numLevels;
+
+        for (int i = dateList.size() - 1; (i > dateList.size() - 1 - numLevels) && (i >= 0); i--) {
+            nextDate = dateList.get(i);
+
+            if (maxDate.before(nextDate)) {
+                retLevel = dateList.size() - i;
+                break;
+            }
+        }
+        return retLevel;
+    }
+
 
     @Override
     protected void onResume() {
