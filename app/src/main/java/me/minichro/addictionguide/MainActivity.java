@@ -75,8 +75,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView nextDateBox;
     private File myFile;
     private Time myTime;
-    private int numLevels;
-    private int[] levelSpaces;
+    private int levelSpaces;
     private int currUserLevel;
 
     private SharedPreferences sharedPref;
@@ -226,29 +225,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateNumLevels() {
         sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        levelSpaces = Integer.parseInt(sharedPref.getString("level_1_hours", "12"));
 
-        numLevels = Integer.parseInt(sharedPref.getString("numLevels", "3"));
-        System.out.println("Number of levels is " + numLevels);
-        levelSpaces = new int[numLevels];
-
-
-        levelSpaces[0] = Integer.parseInt(sharedPref.getString("level_1_hours", "6")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-
-        if (numLevels > 1) {
-            levelSpaces[1] = Integer.parseInt(sharedPref.getString("level_2_hours", "24")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-            if (numLevels > 2) {
-                levelSpaces[2] = Integer.parseInt(sharedPref.getString("level_3_hours", "48")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-                if (numLevels > 3) {
-                    levelSpaces[3] = Integer.parseInt(sharedPref.getString("level_4_hours", "96")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-                    if (numLevels > 4) {
-                        levelSpaces[4] = Integer.parseInt(sharedPref.getString("level_5_hours", "192")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-                        if (numLevels > 5) {
-                            levelSpaces[5] = Integer.parseInt(sharedPref.getString("level_6_hours", "384")) * 60 * 60 * 1000; //6 hours x 60 minutes x 60 x 1000 milliseconds
-                        }
-                    }
-                }
-            }
-        }
     }
 
     @Override
@@ -352,15 +330,18 @@ public class MainActivity extends AppCompatActivity {
     private Calendar processDateList(List<Calendar> dateList) {
         Calendar maxDate = Calendar.getInstance();
         Calendar nextDate;
+        boolean found = false;
 
-        for (int i = dateList.size() - 1; (i > dateList.size() - 1 - numLevels) && (i >= 0); i--) {
+        for (int i = dateList.size() - 1; (i >= 0); i--) {
             nextDate = dateList.get(i);
-            nextDate.add(Calendar.MILLISECOND, levelSpaces[dateList.size() - i - 1]);
+            nextDate.add(Calendar.HOUR, (int)(levelSpaces * Math.pow(2.0,(dateList.size() - i - 1))));
+            Log.i("Addiction Guide",dateTimeFormat.format(nextDate.getTime()) + " : " + (6 * Math.pow(2.0,(dateList.size() - i - 1))));
 
             if (maxDate.before(nextDate)) {
-
-                maxDate = nextDate;
-
+                if(found == false) {
+                    maxDate = nextDate;
+                    found = true;
+                }
             }
         }
         return maxDate;
@@ -373,9 +354,9 @@ public class MainActivity extends AppCompatActivity {
     {
         Calendar maxDate = Calendar.getInstance();
         Calendar nextDate;
-        int retLevel = numLevels;
+        int retLevel = 20;
 
-        for (int i = dateList.size() - 1; (i > dateList.size() - 1 - numLevels) && (i >= 0); i--) {
+        for (int i = dateList.size() - 1; i >= 0; i--) {
             nextDate = dateList.get(i);
 
             if (maxDate.before(nextDate)) {

@@ -34,7 +34,7 @@
             android:layout_alignParentTop="true"
             android:background="#aaffffff"
             android:gravity="center"
-            android:text="Next allowed Time"
+            android:text="Level increase at :"
             android:textAlignment="center"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="#000000"
