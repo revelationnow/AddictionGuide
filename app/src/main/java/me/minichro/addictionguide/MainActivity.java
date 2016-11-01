@@ -1,6 +1,5 @@
 package me.minichro.addictionguide;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
@@ -10,22 +9,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -34,32 +28,22 @@ import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
 
-import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
-import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    private Button myButton;
-    private Button addButton;
-
-    private DatePickerDialog datePicker;
-    private TimePickerDialog timePicker;
+    private Button addCurrentDateButton;
+    private Button addSelectedDateButton;
 
     private TextView dateText;
     private TextView timeText;
@@ -73,13 +57,32 @@ public class MainActivity extends AppCompatActivity {
     private Calendar custDate;
 
     private TextView nextDateBox;
-    private File myFile;
-    private Time myTime;
+
     private int levelSpaces;
     private int currUserLevel;
 
     private SharedPreferences sharedPref;
     Context context;
+
+    Handler updateDatesHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg)
+        {
+            Bundle bundle = msg.getData();
+            String recentDatesString = bundle.getString("recentDates");
+            String levelUpDate = bundle.getString("levelUpDate");
+            String currentLevel = bundle.getString("currentLevel");
+            recentDates.setText(recentDatesString);
+            nextDateBox.setText(levelUpDate);
+            currLevel.setText("CURRENT LEVEL : " + currentLevel);
+
+
+        }
+
+
+    };
+
+    private static final int MAX_LEVELS = 20;
     /**
      * ATTENTION: This was auto-generated to implement the App Indexing API.
      * See https://g.co/AppIndexing/AndroidStudio for more information.
@@ -97,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
 
         context = this;
         nextDateBox = (TextView) findViewById(R.id.textView);
-        myButton = (Button) findViewById(R.id.button);
-        addButton = (Button) findViewById(R.id.button2);
+        addCurrentDateButton = (Button) findViewById(R.id.button);
+        addSelectedDateButton = (Button) findViewById(R.id.button2);
         dateText = (TextView) findViewById(R.id.editText);
         timeText = (TextView) findViewById(R.id.editText2);
         recentDates = (TextView) findViewById(R.id.textView3);
@@ -133,11 +136,11 @@ public class MainActivity extends AppCompatActivity {
         updateNumLevels();
         updateNextTime();
 
-        addButton.setOnClickListener(new View.OnClickListener() {
+        addSelectedDateButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new AlertDialog.Builder(MainActivity.this)
-                        .setView(getLayoutInflater().inflate(R.layout.content_alert,null))
-                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert,null))
+                        .setView(getLayoutInflater().inflate(R.layout.content_alert, null))
+                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert, null))
                         .setTitle("Add")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 
@@ -175,11 +178,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        myButton.setOnClickListener(new View.OnClickListener() {
+        addCurrentDateButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 new AlertDialog.Builder(MainActivity.this)
-                        .setView(getLayoutInflater().inflate(R.layout.content_alert,null))
-                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert,null))
+                        .setView(getLayoutInflater().inflate(R.layout.content_alert, null))
+                        .setCustomTitle(getLayoutInflater().inflate(R.layout.title_alert, null))
                         .setTitle("Add")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
 
@@ -279,49 +282,74 @@ public class MainActivity extends AppCompatActivity {
     }
 
     protected void updateNextTime() {
-        List<Calendar> dateList = new ArrayList<>();
-        Calendar nextDate;
-        try {
-            FileInputStream fis = new FileInputStream(getFilesDir() + "test.txt");
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            boolean flag = true;
-            Calendar temp;
-            int count = 0;
 
-            while (flag) {
-                temp = (Calendar) ois.readObject();
-                if (temp == null) {
-                    flag = false;
-                } else {
-                    dateList.add(temp);
+        Runnable runnable = new Runnable() {
+
+            public void run() {
+                List<Calendar> dateList = new ArrayList<>();
+                try {
+                    FileInputStream fis = new FileInputStream(getFilesDir() + "test.txt");
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    boolean flag = true;
+                    Calendar temp;
+
+                    while (flag) {
+                        temp = (Calendar) ois.readObject();
+                        if (temp == null) {
+                            flag = false;
+                        } else {
+                            dateList.add(temp);
+                        }
+                    }
+                    ois.close();
+                } catch (Exception e) {
+                    if (!(e instanceof EOFException)) {
+                        e.printStackTrace();
+                    }
                 }
-                count++;
+
+                Bundle bundle = new Bundle();
+                if (dateList.size() > 0) {
+                    Collections.sort(dateList);
+                    /* Recent dates must be update before calling processDateList, since processDateList will modify the list of dates */
+
+                    String textToSet = "";
+
+                    for (int i = dateList.size() - 1; i >= 0; i--) {
+                        textToSet += dateTimeFormat.format(dateList.get(i).getTime()) + "\n";
+                    }
+
+
+
+
+
+
+                    Calendar dateToSet = processDateList(dateList);
+                    currUserLevel = updateUserLevel(dateList);
+
+                    bundle.putString("recentDates",textToSet);
+                    bundle.putString("currentLevel", "" + currUserLevel);
+                    bundle.putString("levelUpDate",dateTimeFormat.format(dateToSet.getTime()));
+
+                    //recentDates.setText(textToSet);
+                    //currLevel.setText("CURRENT LEVEL : " + currUserLevel);
+                    //nextDateBox.setText(dateTimeFormat.format(dateToSet.getTime()));
+
+                } else {
+                    //nextDateBox.setText("No Data yet");
+                    bundle.putString("recentDates","No Data yet");
+                    bundle.putString("levelUpDate","No Data yet");
+                    bundle.putString("currentLevel", "-");
+                }
+                Message msg = updateDatesHandler.obtainMessage();
+                msg.setData(bundle);
+                updateDatesHandler.sendMessage(msg);
             }
-            ois.close();
-        } catch (Exception e) {
-            if (!(e instanceof EOFException)) {
-                e.printStackTrace();
-            }
-        }
+        };
 
-        if (dateList.size() > 0) {
-            Collections.sort(dateList);
-            /* Recent dates must be update before calling processDateList, since processDateList will modify the list of dates */
-            recentDates.setText("");
+        Thread updateThread = new Thread(runnable);
+        updateThread.start();
 
-            for (int i = dateList.size() - 1; i >= 0; i--) {
-                recentDates.setText(recentDates.getText().toString() + dateTimeFormat.format(dateList.get(i).getTime()) + "\n");
-            }
-
-
-            Calendar dateToSet = processDateList(dateList);
-            currUserLevel = updateUserLevel(dateList);
-            currLevel.setText("CURRENT LEVEL : " + currUserLevel);
-            nextDateBox.setText(dateTimeFormat.format(dateToSet.getTime()));
-
-        } else {
-            nextDateBox.setText("No Data yet");
-        }
     }
 
     /* Here dateList will get updated by the levelspaces, so all further use must consider that
@@ -334,11 +362,11 @@ public class MainActivity extends AppCompatActivity {
 
         for (int i = dateList.size() - 1; (i >= 0); i--) {
             nextDate = dateList.get(i);
-            nextDate.add(Calendar.HOUR, (int)(levelSpaces * Math.pow(2.0,(dateList.size() - i - 1))));
-            Log.i("Addiction Guide",dateTimeFormat.format(nextDate.getTime()) + " : " + (6 * Math.pow(2.0,(dateList.size() - i - 1))));
+            nextDate.add(Calendar.HOUR, (int) (levelSpaces * Math.pow(2.0, (dateList.size() - i - 1))));
+            Log.i("Addiction Guide", dateTimeFormat.format(nextDate.getTime()) + " : " + (6 * Math.pow(2.0, (dateList.size() - i - 1))));
 
             if (maxDate.before(nextDate)) {
-                if(found == false) {
+                if (found == false) {
                     maxDate = nextDate;
                     found = true;
                 }
@@ -350,8 +378,7 @@ public class MainActivity extends AppCompatActivity {
     /* dateList already has levelSpaces added to it, so no need to add levelSpaces to get the cutoff date for each level
      *
      */
-    private int updateUserLevel(List<Calendar> dateList)
-    {
+    private int updateUserLevel(List<Calendar> dateList) {
         Calendar maxDate = Calendar.getInstance();
         Calendar nextDate;
         int retLevel = 20;

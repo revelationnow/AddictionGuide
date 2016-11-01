@@ -234,7 +234,7 @@
                 android:inputType="textMultiLine"
                 android:background="#99000000"
                 android:textColor="#ffffff"
-                android:text="Medium Text"
+                android:text="No Data yet"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textIsSelectable="false"
                 android:textSize="22dp" />
