@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AddictionGuide.iml" filepath="$PROJECT_DIR$/AddictionGuide.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/AddictionGuide.iml" filepath="$PROJECT_DIR$/AddictionGuide.iml" group="AddictionGuide" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" group="AddictionGuide/app" />
     </modules>
   </component>
 </project>

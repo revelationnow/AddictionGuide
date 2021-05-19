@@ -3,11 +3,15 @@
     <EditTextPreference
         android:capitalize="words"
         android:defaultValue="12"
+        android:dialogMessage="Enter the number of hours that will constitute the base level"
+        android:dialogTitle="Enter new Base level"
         android:inputType="number"
         android:key="level_1_hours"
         android:maxLines="1"
         android:selectAllOnFocus="true"
         android:singleLine="true"
+        android:textAppearance="@style/TextAppearance.AppCompat.Large"
+        android:textColor="#000000"
         android:title="Base Level Hours " />
 
 

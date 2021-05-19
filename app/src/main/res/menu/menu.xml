@@ -5,7 +5,15 @@
 
     <!-- Settings, should always be in the overflow -->
     <item android:id="@+id/action_settings"
-        android:title="SETTINGS"
+        android:title="Settings"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_export"
+        android:title="Export"
+        app:showAsAction="never"/>
+
+    <item android:id="@+id/action_import"
+        android:title="Import"
         app:showAsAction="never"/>
 
 </menu>
